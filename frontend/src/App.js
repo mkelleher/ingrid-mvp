@@ -351,7 +351,7 @@ const BarcodeScanner = ({ onResult, loading }) => {
     <div className="bg-white rounded-lg overflow-hidden shadow-sm">
       {!isScanning ? (
         <div className="p-8 text-center">
-          <FiScan size={64} className="mx-auto mb-4 text-green-600" />
+          <FiSearch size={64} className="mx-auto mb-4 text-green-600" />
           <h3 className="text-lg font-semibold mb-2">Scan Product Barcode</h3>
           <p className="text-gray-600 mb-6">
             Point your camera at the product barcode to get ingredient analysis

@@ -163,7 +163,7 @@ const ScanScreen = () => {
                 : 'text-gray-600'
             }`}
           >
-            <FiScan className="inline mr-2" />
+            <FiSearch className="inline mr-2" />
             Barcode
           </button>
           <button

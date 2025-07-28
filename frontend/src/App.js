@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
-import { Camera } from 'react-camera-pro';
 import { Html5QrcodeScanner } from 'html5-qrcode';
 import { FiCamera, FiHeart, FiClock, FiSearch, FiUpload } from 'react-icons/fi';
 import { MdOutlineClose, MdOutlineCameraAlt } from 'react-icons/md';
@@ -37,11 +36,10 @@ function App() {
 }
 
 // Navigation Component
-const Navigation = ({ activeTab, onTabChange }) => {
+const Navigation = ({ activeTab }) => {
   const navigate = useNavigate();
   
-  const handleTabClick = (tab, path) => {
-    onTabChange(tab);
+  const handleTabClick = (path) => {
     navigate(path);
   };
 
@@ -49,7 +47,7 @@ const Navigation = ({ activeTab, onTabChange }) => {
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2">
       <div className="flex justify-around items-center">
         <button
-          onClick={() => handleTabClick('scan', '/')}
+          onClick={() => handleTabClick('/')}
           className={`flex flex-col items-center p-2 ${
             activeTab === 'scan' ? 'text-green-600' : 'text-gray-500'
           }`}
@@ -59,7 +57,7 @@ const Navigation = ({ activeTab, onTabChange }) => {
         </button>
         
         <button
-          onClick={() => handleTabClick('history', '/history')}
+          onClick={() => handleTabClick('/history')}
           className={`flex flex-col items-center p-2 ${
             activeTab === 'history' ? 'text-green-600' : 'text-gray-500'
           }`}
@@ -69,7 +67,7 @@ const Navigation = ({ activeTab, onTabChange }) => {
         </button>
         
         <button
-          onClick={() => handleTabClick('favorites', '/favorites')}
+          onClick={() => handleTabClick('/favorites')}
           className={`flex flex-col items-center p-2 ${
             activeTab === 'favorites' ? 'text-green-600' : 'text-gray-500'
           }`}
@@ -84,9 +82,8 @@ const Navigation = ({ activeTab, onTabChange }) => {
 
 // Scan Screen Component
 const ScanScreen = () => {
-  const [activeTab, setActiveTab] = useState('scan');
-  const [scanMode, setScanMode] = useState('camera'); // 'camera', 'barcode', 'photo'
-  const [isScanning, setIsScanning] = useState(false);
+  const [activeTab] = useState('scan');
+  const [scanMode, setScanMode] = useState('barcode'); // Start with barcode for simplicity
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -145,17 +142,6 @@ const ScanScreen = () => {
       <div className="p-4">
         <div className="flex bg-gray-100 rounded-lg p-1 mb-6">
           <button
-            onClick={() => setScanMode('camera')}
-            className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors ${
-              scanMode === 'camera'
-                ? 'bg-white text-green-600 shadow-sm'
-                : 'text-gray-600'
-            }`}
-          >
-            <FiCamera className="inline mr-2" />
-            Camera
-          </button>
-          <button
             onClick={() => setScanMode('barcode')}
             className={`flex-1 py-3 px-4 rounded-md text-sm font-medium transition-colors ${
               scanMode === 'barcode'
@@ -180,10 +166,6 @@ const ScanScreen = () => {
         </div>
 
         {/* Scan Interface */}
-        {scanMode === 'camera' && (
-          <CameraScanner onResult={handlePhotoScan} loading={loading} />
-        )}
-        
         {scanMode === 'barcode' && (
           <BarcodeScanner onResult={handleBarcodeResult} loading={loading} />
         )}
@@ -193,97 +175,7 @@ const ScanScreen = () => {
         )}
       </div>
 
-      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
-    </div>
-  );
-};
-
-// Camera Scanner Component
-const CameraScanner = ({ onResult, loading }) => {
-  const [camera, setCamera] = useState(null);
-  const [capturedImage, setCapturedImage] = useState(null);
-
-  const handleCapture = () => {
-    if (camera) {
-      const imageSrc = camera.takePhoto();
-      setCapturedImage(imageSrc);
-    }
-  };
-
-  const handleConfirm = async () => {
-    if (capturedImage) {
-      // Convert base64 to file
-      const response = await fetch(capturedImage);
-      const blob = await response.blob();
-      const file = new File([blob], 'captured_image.jpg', { type: 'image/jpeg' });
-      onResult(file);
-    }
-  };
-
-  const handleRetake = () => {
-    setCapturedImage(null);
-  };
-
-  if (loading) {
-    return (
-      <div className="bg-white rounded-lg p-8 text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-        <p className="text-gray-600">Analyzing ingredients...</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-sm">
-      {!capturedImage ? (
-        <div className="relative">
-          <div className="aspect-square">
-            <Camera
-              ref={setCamera}
-              aspectRatio="cover"
-              facingMode="environment"
-              errorMessages={{
-                noCameraAccessible: 'No camera device accessible. Please connect your camera or try a different browser.',
-                permissionDenied: 'Permission denied. Please refresh and give camera permission.',
-                switchCamera: 'It is not possible to switch camera to different one because there is only one video device accessible.',
-                canvas: 'Canvas is not supported.',
-              }}
-            />
-          </div>
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-            <button
-              onClick={handleCapture}
-              className="bg-green-600 text-white p-4 rounded-full shadow-lg hover:bg-green-700 transition-colors"
-            >
-              <MdOutlineCameraAlt size={32} />
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="relative">
-          <img src={capturedImage} alt="Captured" className="w-full aspect-square object-cover" />
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-4">
-            <button
-              onClick={handleRetake}
-              className="bg-gray-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-gray-700 transition-colors"
-            >
-              Retake
-            </button>
-            <button
-              onClick={handleConfirm}
-              className="bg-green-600 text-white px-6 py-3 rounded-full shadow-lg hover:bg-green-700 transition-colors"
-            >
-              Analyze
-            </button>
-          </div>
-        </div>
-      )}
-      
-      <div className="p-4">
-        <p className="text-gray-600 text-sm text-center">
-          Position the product label in the camera frame and tap the button to capture
-        </p>
-      </div>
+      <Navigation activeTab={activeTab} />
     </div>
   );
 };
@@ -468,7 +360,7 @@ const PhotoUploader = ({ onResult, loading }) => {
 // Result Screen Component
 const ResultScreen = () => {
   const [result, setResult] = useState(null);
-  const [activeTab, setActiveTab] = useState('scan');
+  const [activeTab] = useState('scan');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -617,14 +509,14 @@ const ResultScreen = () => {
         </div>
       </div>
 
-      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <Navigation activeTab={activeTab} />
     </div>
   );
 };
 
 // History Screen Component
 const HistoryScreen = () => {
-  const [activeTab, setActiveTab] = useState('history');
+  const [activeTab] = useState('history');
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -682,14 +574,14 @@ const HistoryScreen = () => {
         )}
       </div>
 
-      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <Navigation activeTab={activeTab} />
     </div>
   );
 };
 
 // Favorites Screen Component
 const FavoritesScreen = () => {
-  const [activeTab, setActiveTab] = useState('favorites');
+  const [activeTab] = useState('favorites');
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -747,7 +639,7 @@ const FavoritesScreen = () => {
         )}
       </div>
 
-      <Navigation activeTab={activeTab} onTabChange={setActiveTab} />
+      <Navigation activeTab={activeTab} />
     </div>
   );
 };

@@ -54,7 +54,7 @@ const Navigation = ({ activeTab, onTabChange }) => {
             activeTab === 'scan' ? 'text-green-600' : 'text-gray-500'
           }`}
         >
-          <FiScan size={24} />
+          <FiSearch size={24} />
           <span className="text-xs mt-1">Scan</span>
         </button>
         

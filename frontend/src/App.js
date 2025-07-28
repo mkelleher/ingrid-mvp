@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Camera } from 'react-camera-pro';
 import { Html5QrcodeScanner } from 'html5-qrcode';
-import { FiCamera, FiHeart, FiClock, FiScan, FiUpload } from 'react-icons/fi';
+import { FiCamera, FiHeart, FiClock, FiSearch, FiUpload } from 'react-icons/fi';
 import { MdOutlineClose, MdOutlineCameraAlt } from 'react-icons/md';
 import axios from 'axios';
 import './App.css';

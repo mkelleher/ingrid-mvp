@@ -125,7 +125,8 @@ const ScanScreen = () => {
       navigate('/result');
     } catch (error) {
       console.error('Error scanning photo:', error);
-      alert('Failed to scan photo. Please try again.');
+      const errorMessage = error.response?.data?.detail || 'Failed to scan photo. Please try again.';
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }

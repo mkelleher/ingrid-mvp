@@ -408,7 +408,7 @@ async def scan_barcode(request: BarcodeRequest):
         
     except Exception as e:
         logger.error(f"Error scanning barcode: {e}")
-        raise HTTPException(status_code=500, detail="Failed to scan barcode")
+        raise HTTPException(status_code=500, detail=f"Failed to scan barcode: {str(e)}")
 
 @api_router.post("/scan/ocr", response_model=AnalysisResult)
 async def scan_ocr(session_id: str = Form(...), image: UploadFile = File(...)):

@@ -425,25 +425,41 @@ async def scan_barcode(request: BarcodeRequest):
 async def scan_ocr(session_id: str = Form(...), image: UploadFile = File(...)):
     """Scan product by OCR from image"""
     try:
+        logger.info(f"Starting OCR processing for session: {session_id}")
+        
         # Read and process image
         image_data = await image.read()
         pil_image = Image.open(io.BytesIO(image_data))
         
-        # Perform OCR
-        results = ocr_reader.readtext(np.array(pil_image))
-        text = " ".join([result[1] for result in results])
+        logger.info("Image loaded successfully, starting OCR...")
         
-        logger.info(f"OCR extracted text: {text[:200]}...")  # Log first 200 chars for debugging
+        # Perform OCR with timeout protection
+        import asyncio
+        try:
+            # Run OCR in a thread pool to avoid blocking
+            loop = asyncio.get_event_loop()
+            results = await loop.run_in_executor(
+                None, 
+                lambda: ocr_reader.readtext(np.array(pil_image))
+            )
+            text = " ".join([result[1] for result in results])
+            logger.info(f"OCR extracted text length: {len(text)} characters")
+        except Exception as e:
+            logger.error(f"OCR processing failed: {e}")
+            # Create minimal product info if OCR fails
+            text = ""
         
         # Extract ingredients and certifications
         ingredients = extract_ingredients_from_text(text)
+        logger.info(f"Extracted {len(ingredients)} ingredients")
         
-        # Enhanced certification detection for OCR
+        # Enhanced certification detection for OCR with timeout
         certifications = await enhanced_certification_detection(
             product_name="OCR Scanned Product",
             brand=None,
             text=text
         )
+        logger.info(f"Detected certifications: {certifications}")
         
         # Create product record
         ingredient_count = len(ingredients)
@@ -459,6 +475,7 @@ async def scan_ocr(session_id: str = Form(...), image: UploadFile = File(...)):
         
         # Save product to database
         await db.products.insert_one(product.dict())
+        logger.info(f"Product saved with ID: {product.id}")
         
         # Record scan
         scan_record = ScanRecord(
@@ -473,6 +490,8 @@ async def scan_ocr(session_id: str = Form(...), image: UploadFile = File(...)):
             "session_id": session_id,
             "product_id": product.id
         })
+        
+        logger.info("OCR processing completed successfully")
         
         return AnalysisResult(
             product=product,

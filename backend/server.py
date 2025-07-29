@@ -143,10 +143,17 @@ async def enhanced_certification_detection(product_name: str, brand: str = None,
     """Enhanced certification detection using USDA API and text analysis"""
     certifications = []
     
-    # First, check USDA Organic Integrity Database
+    # First, check USDA Organic Integrity Database with timeout
     try:
-        usda_certs = await lookup_usda_organic_certification(product_name, brand)
+        # Add timeout to prevent hanging
+        import asyncio
+        usda_certs = await asyncio.wait_for(
+            lookup_usda_organic_certification(product_name, brand), 
+            timeout=5.0
+        )
         certifications.extend(usda_certs)
+    except asyncio.TimeoutError:
+        logger.warning("USDA API check timed out")
     except Exception as e:
         logger.warning(f"USDA API check failed: {e}")
     

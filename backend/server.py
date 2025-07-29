@@ -330,7 +330,13 @@ async def scan_ocr(session_id: str = Form(...), image: UploadFile = File(...)):
         
         # Extract ingredients and certifications
         ingredients = extract_ingredients_from_text(text)
-        certifications = detect_certifications(text)
+        
+        # Enhanced certification detection for OCR
+        certifications = await enhanced_certification_detection(
+            product_name="OCR Scanned Product",
+            brand=None,
+            text=text
+        )
         
         # Create product record
         ingredient_count = len(ingredients)

@@ -275,15 +275,15 @@ async def comprehensive_product_lookup(barcode: str) -> Optional[Dict[str, Any]]
 async def lookup_usda_fooddata_central(query: str, barcode: str = None) -> Optional[Dict[str, Any]]:
     """Lookup product information using USDA FoodData Central API"""
     try:
-        usda_api_key = os.environ.get('USDA_ORGANIC_API_KEY')  # Using same key for FDC
-        if not usda_api_key:
+        usda_fdc_api_key = os.environ.get('USDA_FDC_API_KEY')
+        if not usda_fdc_api_key:
             return None
         
         base_url = "https://api.nal.usda.gov/fdc/v1/foods/search"
         
         # Search parameters
         params = {
-            "api_key": usda_api_key,
+            "api_key": usda_fdc_api_key,
             "query": query,
             "dataType": ["Branded", "Foundation", "SR Legacy"],  # Include all relevant data types
             "pageSize": 10

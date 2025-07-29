@@ -10,7 +10,7 @@ from PIL import Image
 import base64
 
 class IngridAPITester:
-    def __init__(self, base_url="https://a165ce7d-3f72-4652-abdd-b6cf18dc4cf1.preview.emergentagent.com"):
+    def __init__(self, base_url="https://e741bfcc-c88e-4c94-9fe8-d56b7bd4d544.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.session_id = f"test_session_{uuid.uuid4().hex[:8]}"

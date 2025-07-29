@@ -185,6 +185,8 @@ const ScanScreen = () => {
 const BarcodeScanner = ({ onResult, loading }) => {
   const [scanner, setScanner] = useState(null);
   const [isScanning, setIsScanning] = useState(false);
+  const [manualBarcode, setManualBarcode] = useState('');
+  const [showManualEntry, setShowManualEntry] = useState(false);
 
   useEffect(() => {
     if (isScanning) {
@@ -222,6 +224,7 @@ const BarcodeScanner = ({ onResult, loading }) => {
 
   const startScanning = () => {
     setIsScanning(true);
+    setShowManualEntry(false);
   };
 
   const stopScanning = () => {
@@ -229,6 +232,21 @@ const BarcodeScanner = ({ onResult, loading }) => {
       scanner.clear();
     }
     setIsScanning(false);
+  };
+
+  const handleManualSubmit = (e) => {
+    e.preventDefault();
+    if (manualBarcode.trim()) {
+      onResult(manualBarcode.trim());
+      setManualBarcode('');
+    }
+  };
+
+  const toggleManualEntry = () => {
+    setShowManualEntry(!showManualEntry);
+    if (isScanning) {
+      stopScanning();
+    }
   };
 
   if (loading) {
@@ -242,29 +260,100 @@ const BarcodeScanner = ({ onResult, loading }) => {
 
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-sm">
-      {!isScanning ? (
+      {!isScanning && !showManualEntry ? (
         <div className="p-8 text-center">
           <FiSearch size={64} className="mx-auto mb-4 text-green-600" />
           <h3 className="text-lg font-semibold mb-2">Scan Product Barcode</h3>
           <p className="text-gray-600 mb-6">
             Point your camera at the product barcode to get ingredient analysis
           </p>
-          <button
-            onClick={startScanning}
-            className="bg-green-600 text-white px-8 py-3 rounded-full shadow-lg hover:bg-green-700 transition-colors"
-          >
-            Start Scanning
-          </button>
+          <div className="space-y-3">
+            <button
+              onClick={startScanning}
+              className="w-full bg-green-600 text-white px-8 py-3 rounded-full shadow-lg hover:bg-green-700 transition-colors"
+            >
+              📷 Start Camera Scanning
+            </button>
+            <button
+              onClick={toggleManualEntry}
+              className="w-full bg-blue-600 text-white px-8 py-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors"
+            >
+              ⌨️ Enter Barcode Manually
+            </button>
+          </div>
+          <p className="text-xs text-gray-500 mt-4">
+            Having trouble with camera? Use manual entry instead
+          </p>
+        </div>
+      ) : showManualEntry ? (
+        <div className="p-8">
+          <h3 className="text-lg font-semibold mb-4 text-center">Enter Barcode Manually</h3>
+          <form onSubmit={handleManualSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Product Barcode (UPC/EAN)
+              </label>
+              <input
+                type="text"
+                value={manualBarcode}
+                onChange={(e) => setManualBarcode(e.target.value)}
+                placeholder="e.g. 3017620422003"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                pattern="[0-9]{8,14}"
+                title="Enter 8-14 digit barcode"
+              />
+            </div>
+            <div className="flex space-x-3">
+              <button
+                type="submit"
+                disabled={!manualBarcode.trim()}
+                className="flex-1 bg-green-600 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                🔍 Look Up Product
+              </button>
+              <button
+                type="button"
+                onClick={toggleManualEntry}
+                className="flex-1 bg-gray-600 text-white px-6 py-3 rounded-full hover:bg-gray-700 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+          <p className="text-xs text-gray-500 mt-4 text-center">
+            Find the barcode on your product packaging (usually 8-14 digits)
+          </p>
         </div>
       ) : (
         <div>
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <span className="text-yellow-400">⚠️</span>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-yellow-700">
+                  <strong>Camera Permission Required:</strong> Please allow camera access when prompted, then point your camera at the barcode.
+                </p>
+                <p className="text-xs text-yellow-600 mt-1">
+                  Having trouble? Try the "Enter Manually" option below.
+                </p>
+              </div>
+            </div>
+          </div>
           <div id="barcode-reader" className="w-full"></div>
-          <div className="p-4 text-center">
+          <div className="p-4 text-center space-y-2">
             <button
               onClick={stopScanning}
-              className="bg-gray-600 text-white px-6 py-2 rounded-full hover:bg-gray-700 transition-colors"
+              className="bg-gray-600 text-white px-6 py-2 rounded-full hover:bg-gray-700 transition-colors mr-3"
             >
               Stop Scanning
+            </button>
+            <button
+              onClick={toggleManualEntry}
+              className="bg-blue-600 text-white px-6 py-2 rounded-full hover:bg-blue-700 transition-colors"
+            >
+              Enter Manually Instead
             </button>
           </div>
         </div>

@@ -15,6 +15,7 @@ import re
 import base64
 from PIL import Image
 import io
+import numpy as np
 import easyocr
 
 ROOT_DIR = Path(__file__).parent

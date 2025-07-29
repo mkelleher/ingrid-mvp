@@ -419,8 +419,10 @@ async def scan_ocr(session_id: str = Form(...), image: UploadFile = File(...)):
         pil_image = Image.open(io.BytesIO(image_data))
         
         # Perform OCR
-        results = ocr_reader.readtext(image_data)
+        results = ocr_reader.readtext(np.array(pil_image))
         text = " ".join([result[1] for result in results])
+        
+        logger.info(f"OCR extracted text: {text[:200]}...")  # Log first 200 chars for debugging
         
         # Extract ingredients and certifications
         ingredients = extract_ingredients_from_text(text)

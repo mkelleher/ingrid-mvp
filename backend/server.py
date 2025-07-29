@@ -138,6 +138,30 @@ def detect_certifications(text: str) -> List[str]:
     
     return certifications
 
+async def enhanced_certification_detection(product_name: str, brand: str = None, text: str = "") -> List[str]:
+    """Enhanced certification detection using USDA API and text analysis"""
+    certifications = []
+    
+    # First, check USDA Organic Integrity Database
+    try:
+        usda_certs = await lookup_usda_organic_certification(product_name, brand)
+        certifications.extend(usda_certs)
+    except Exception as e:
+        logger.warning(f"USDA API check failed: {e}")
+    
+    # Then, check text-based certifications
+    text_certs = detect_certifications(text)
+    
+    # Merge certifications, avoiding duplicates
+    for cert in text_certs:
+        if cert not in certifications:
+            # If USDA API found "USDA Organic", don't add generic "Organic"
+            if cert == "Organic" and "USDA Organic" in certifications:
+                continue
+            certifications.append(cert)
+    
+    return certifications
+
 async def lookup_usda_organic_certification(product_name: str, brand: str = None) -> List[str]:
     """Check USDA Organic Integrity Database for organic certification"""
     try:

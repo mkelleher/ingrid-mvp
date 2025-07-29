@@ -194,17 +194,21 @@ async def lookup_usda_organic_certification(product_name: str, brand: str = None
                     )
                     
                     if response.status_code == 200:
-                        data = response.json()
-                        
-                        # Check if any results indicate organic certification
-                        if "results" in data and data["results"]:
-                            for result in data["results"]:
-                                # Look for organic certification indicators
-                                if any(keyword in str(result).lower() for keyword in 
-                                      ['organic', 'certified organic', 'usda organic']):
-                                    if "USDA Organic" not in certifications:
-                                        certifications.append("USDA Organic")
-                                    break
+                        try:
+                            data = response.json()
+                            
+                            # Check if any results indicate organic certification
+                            if "results" in data and data["results"]:
+                                for result in data["results"]:
+                                    # Look for organic certification indicators
+                                    if any(keyword in str(result).lower() for keyword in 
+                                          ['organic', 'certified organic', 'usda organic']):
+                                        if "USDA Organic" not in certifications:
+                                            certifications.append("USDA Organic")
+                                        break
+                        except (ValueError, json.JSONDecodeError) as e:
+                            logger.warning(f"Failed to parse USDA API JSON response for term '{term}': {e}")
+                            continue
                     
             except Exception as e:
                 logger.warning(f"USDA API request failed for term '{term}': {e}")

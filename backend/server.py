@@ -280,36 +280,6 @@ async def lookup_usda_fooddata_central(query: str, barcode: str = None) -> Optio
         logger.error(f"Error looking up USDA FoodData Central: {e}")
         return None
 
-async def lookup_product_by_barcode(barcode: str) -> Optional[Dict[str, Any]]:
-    """Lookup product information by barcode using external API"""
-    # Try OpenFoodFacts first (free API)
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(f"https://world.openfoodfacts.org/api/v0/product/{barcode}.json")
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("status") == 1:
-                    product = data.get("product", {})
-                    ingredients_text = product.get("ingredients_text", "")
-                    
-                    # Parse ingredients
-                    ingredients = []
-                    if ingredients_text:
-                        ingredients = [ing.strip() for ing in re.split(r'[,;]', ingredients_text) if ing.strip()]
-                    
-                    return {
-                        "name": product.get("product_name", "Unknown Product"),
-                        "brand": product.get("brands", "").split(",")[0] if product.get("brands") else None,
-                        "ingredients": ingredients,
-                        "image_url": product.get("image_url"),
-                        "ingredients_text": ingredients_text,
-                        "labels": product.get("labels", "")
-                    }
-    except Exception as e:
-        logger.error(f"Error looking up barcode {barcode}: {e}")
-    
-    return None
-
 # API Endpoints
 @api_router.get("/")
 async def root():

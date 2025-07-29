@@ -470,7 +470,7 @@ async def scan_ocr(session_id: str = Form(...), image: UploadFile = File(...)):
         
     except Exception as e:
         logger.error(f"Error processing OCR: {e}")
-        raise HTTPException(status_code=500, detail="Failed to process image")
+        raise HTTPException(status_code=500, detail=f"Failed to process image: {str(e)}")
 
 @api_router.post("/bookmarks/toggle")
 async def toggle_bookmark(session_id: str, product_id: str):

@@ -1,0 +1,67 @@
+# Dependencies
+__pycache__/
+*.py[cod]
+*$py.class
+node_modules/
+.npm
+*.tgz
+*.tar.gz
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Database
+*.db
+*.sqlite3
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Build outputs
+/build
+/dist
+/out
+
+# Railway
+.railway/
+
+# Python virtual environment
+venv/
+env/
+ENV/
+
+# OCR temp files
+*.jpg
+*.png
+temp_images/

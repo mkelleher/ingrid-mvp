@@ -215,6 +215,63 @@ async def lookup_usda_organic_certification(product_name: str, brand: str = None
         logger.error(f"Error checking USDA organic certification: {e}")
         return []
 
+async def lookup_openfoodfacts_by_barcode(barcode: str) -> Optional[Dict[str, Any]]:
+    """Lookup product information by barcode using OpenFoodFacts API as fallback"""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"https://world.openfoodfacts.org/api/v0/product/{barcode}.json")
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("status") == 1:
+                    product = data.get("product", {})
+                    ingredients_text = product.get("ingredients_text", "")
+                    
+                    # Parse ingredients
+                    ingredients = []
+                    if ingredients_text:
+                        ingredients = [ing.strip() for ing in re.split(r'[,;]', ingredients_text) if ing.strip()]
+                    
+                    return {
+                        "name": product.get("product_name", "Unknown Product"),
+                        "brand": product.get("brands", "").split(",")[0] if product.get("brands") else None,
+                        "ingredients": ingredients,
+                        "image_url": product.get("image_url"),
+                        "ingredients_text": ingredients_text,
+                        "labels": product.get("labels", ""),
+                        "source": "OpenFoodFacts"
+                    }
+    except Exception as e:
+        logger.error(f"Error looking up OpenFoodFacts barcode {barcode}: {e}")
+    
+    return None
+
+async def comprehensive_product_lookup(barcode: str) -> Optional[Dict[str, Any]]:
+    """Comprehensive product lookup using both USDA FoodData Central and OpenFoodFacts"""
+    product_info = None
+    
+    # First, try USDA FoodData Central API
+    try:
+        product_info = await lookup_usda_fooddata_central(f"UPC {barcode}", barcode)
+        if product_info:
+            product_info["source"] = "USDA FoodData Central"
+            logger.info(f"Found product in USDA FDC: {product_info['name']}")
+    except Exception as e:
+        logger.warning(f"USDA FoodData Central lookup failed: {e}")
+    
+    # If USDA didn't return results or UPC doesn't match exactly, try OpenFoodFacts
+    if not product_info or not product_info.get("upc_match", False):
+        try:
+            openfood_info = await lookup_openfoodfacts_by_barcode(barcode)
+            if openfood_info:
+                # If we have USDA data but no UPC match, prefer OpenFoodFacts for barcode scans
+                if not product_info or not product_info.get("upc_match", False):
+                    product_info = openfood_info
+                    logger.info(f"Using OpenFoodFacts data: {product_info['name']}")
+        except Exception as e:
+            logger.warning(f"OpenFoodFacts lookup failed: {e}")
+    
+    return product_info
+
 async def lookup_usda_fooddata_central(query: str, barcode: str = None) -> Optional[Dict[str, Any]]:
     """Lookup product information using USDA FoodData Central API"""
     try:

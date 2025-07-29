@@ -215,6 +215,71 @@ async def lookup_usda_organic_certification(product_name: str, brand: str = None
         logger.error(f"Error checking USDA organic certification: {e}")
         return []
 
+async def lookup_usda_fooddata_central(query: str, barcode: str = None) -> Optional[Dict[str, Any]]:
+    """Lookup product information using USDA FoodData Central API"""
+    try:
+        usda_api_key = os.environ.get('USDA_ORGANIC_API_KEY')  # Using same key for FDC
+        if not usda_api_key:
+            return None
+        
+        base_url = "https://api.nal.usda.gov/fdc/v1/foods/search"
+        
+        # Search parameters
+        params = {
+            "api_key": usda_api_key,
+            "query": query,
+            "dataType": ["Branded", "Foundation", "SR Legacy"],  # Include all relevant data types
+            "pageSize": 10
+        }
+        
+        # If barcode is provided, add it to search
+        if barcode:
+            # Also search by UPC/GTIN
+            params["query"] = f"{query} {barcode}"
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.get(base_url, params=params, timeout=10.0)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                if "foods" in data and data["foods"]:
+                    # Get the first (most relevant) result
+                    food_item = data["foods"][0]
+                    
+                    # Extract ingredients from the food item
+                    ingredients = []
+                    ingredients_text = food_item.get("ingredients", "")
+                    
+                    if ingredients_text:
+                        # Parse ingredients similar to OpenFoodFacts
+                        ingredients = [ing.strip() for ing in re.split(r'[,;]', ingredients_text) if ing.strip()]
+                    
+                    # Extract brand and product name
+                    brand = food_item.get("brandOwner", food_item.get("marketCountry", None))
+                    product_name = food_item.get("description", "Unknown Product")
+                    
+                    # Check if UPC/GTIN matches the barcode
+                    upc_match = barcode and food_item.get("gtinUpc") == barcode
+                    
+                    return {
+                        "name": product_name,
+                        "brand": brand,
+                        "ingredients": ingredients,
+                        "ingredients_text": ingredients_text,
+                        "fdc_id": food_item.get("fdcId"),
+                        "data_type": food_item.get("dataType"),
+                        "upc_match": upc_match,
+                        "publication_date": food_item.get("publicationDate"),
+                        "food_nutrients": food_item.get("foodNutrients", [])
+                    }
+                    
+        return None
+        
+    except Exception as e:
+        logger.error(f"Error looking up USDA FoodData Central: {e}")
+        return None
+
 async def lookup_product_by_barcode(barcode: str) -> Optional[Dict[str, Any]]:
     """Lookup product information by barcode using external API"""
     # Try OpenFoodFacts first (free API)

@@ -320,7 +320,7 @@ async def scan_barcode(request: BarcodeRequest):
     """Scan product by barcode"""
     try:
         # Lookup product info
-        product_info = await lookup_product_by_barcode(request.barcode)
+        product_info = await lookup_usda_fooddata_central(f"Product {request.barcode}", request.barcode)
         
         if not product_info:
             # Create basic product info if lookup fails

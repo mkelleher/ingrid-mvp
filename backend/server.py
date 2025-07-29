@@ -138,6 +138,59 @@ def detect_certifications(text: str) -> List[str]:
     
     return certifications
 
+async def lookup_usda_organic_certification(product_name: str, brand: str = None) -> List[str]:
+    """Check USDA Organic Integrity Database for organic certification"""
+    try:
+        usda_api_key = os.environ.get('USDA_ORGANIC_API_KEY')
+        if not usda_api_key:
+            return []
+        
+        # USDA Organic Integrity Database API endpoint
+        base_url = "https://organic.ams.usda.gov/integrity/api/search"
+        
+        # Search parameters
+        search_terms = [product_name]
+        if brand:
+            search_terms.append(brand)
+        
+        certifications = []
+        
+        for term in search_terms:
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(
+                        base_url,
+                        params={
+                            "q": term,
+                            "api_key": usda_api_key,
+                            "limit": 10
+                        },
+                        timeout=10.0
+                    )
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        
+                        # Check if any results indicate organic certification
+                        if "results" in data and data["results"]:
+                            for result in data["results"]:
+                                # Look for organic certification indicators
+                                if any(keyword in str(result).lower() for keyword in 
+                                      ['organic', 'certified organic', 'usda organic']):
+                                    if "USDA Organic" not in certifications:
+                                        certifications.append("USDA Organic")
+                                    break
+                    
+            except Exception as e:
+                logger.warning(f"USDA API request failed for term '{term}': {e}")
+                continue
+        
+        return certifications
+        
+    except Exception as e:
+        logger.error(f"Error checking USDA organic certification: {e}")
+        return []
+
 async def lookup_product_by_barcode(barcode: str) -> Optional[Dict[str, Any]]:
     """Lookup product information by barcode using external API"""
     # Try OpenFoodFacts first (free API)

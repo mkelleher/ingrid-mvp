@@ -101,7 +101,8 @@ const ScanScreen = () => {
       navigate('/result');
     } catch (error) {
       console.error('Error scanning barcode:', error);
-      alert('Failed to scan barcode. Please try again.');
+      const errorMessage = error.response?.data?.detail || 'Failed to scan barcode. Please try again.';
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }

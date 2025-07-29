@@ -237,7 +237,8 @@ async def lookup_product_by_barcode(barcode: str) -> Optional[Dict[str, Any]]:
                         "brand": product.get("brands", "").split(",")[0] if product.get("brands") else None,
                         "ingredients": ingredients,
                         "image_url": product.get("image_url"),
-                        "certifications": detect_certifications(ingredients_text + " " + str(product.get("labels", "")))
+                        "ingredients_text": ingredients_text,
+                        "labels": product.get("labels", "")
                     }
     except Exception as e:
         logger.error(f"Error looking up barcode {barcode}: {e}")

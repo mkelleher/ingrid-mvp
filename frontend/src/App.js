@@ -404,11 +404,20 @@ const PhotoUploader = ({ onResult, loading }) => {
         <div className="p-8 text-center">
           <FiUpload size={64} className="mx-auto mb-4 text-green-600" />
           <h3 className="text-lg font-semibold mb-2">Upload Product Photo</h3>
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-600 mb-4">
             Choose a clear photo of the product's ingredient label
           </p>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <p className="text-sm text-blue-800 font-medium mb-2">📸 Photo Tips:</p>
+            <ul className="text-xs text-blue-700 space-y-1">
+              <li>• Make sure ingredient list is clearly visible</li>
+              <li>• Use good lighting (avoid shadows)</li>
+              <li>• Keep text straight and in focus</li>
+              <li>• Include the full ingredient section</li>
+            </ul>
+          </div>
           <label className="bg-green-600 text-white px-8 py-3 rounded-full shadow-lg hover:bg-green-700 transition-colors cursor-pointer inline-block">
-            Choose Photo
+            📷 Choose Photo
             <input
               type="file"
               accept="image/*"
@@ -416,6 +425,9 @@ const PhotoUploader = ({ onResult, loading }) => {
               className="hidden"
             />
           </label>
+          <p className="text-xs text-gray-500 mt-4">
+            Supports JPG, PNG, and other image formats
+          </p>
         </div>
       ) : (
         <div>

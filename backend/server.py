@@ -264,8 +264,16 @@ async def scan_barcode(request: BarcodeRequest):
                 "brand": None,
                 "ingredients": [],
                 "image_url": None,
-                "certifications": []
+                "ingredients_text": "",
+                "labels": ""
             }
+        
+        # Enhanced certification detection using USDA API
+        certifications = await enhanced_certification_detection(
+            product_name=product_info["name"],
+            brand=product_info["brand"],
+            text=product_info.get("ingredients_text", "") + " " + product_info.get("labels", "")
+        )
         
         # Create product record
         ingredient_count = len(product_info["ingredients"])

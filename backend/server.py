@@ -429,9 +429,35 @@ async def scan_ocr(session_id: str = Form(...), image: UploadFile = File(...)):
         
         # Read and process image
         image_data = await image.read()
-        pil_image = Image.open(io.BytesIO(image_data))
-        
-        logger.info("Image loaded successfully, starting OCR...")
+        try:
+            pil_image = Image.open(io.BytesIO(image_data))
+            logger.info("Image loaded successfully, starting OCR...")
+        except Exception as e:
+            logger.error(f"Invalid image file: {e}")
+            # Create minimal product info if image is invalid
+            product = ProductInfo(
+                name="Invalid Image",
+                ingredients=[],
+                ingredient_count=0,
+                rating="green",
+                certifications=[]
+            )
+            
+            # Save product to database
+            await db.products.insert_one(product.dict())
+            
+            # Record scan
+            scan_record = ScanRecord(
+                session_id=session_id,
+                product_id=product.id,
+                scan_type="ocr"
+            )
+            await db.scans.insert_one(scan_record.dict())
+            
+            return AnalysisResult(
+                product=product,
+                is_bookmarked=False
+            )
         
         # Perform OCR with timeout protection
         import asyncio

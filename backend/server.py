@@ -286,7 +286,7 @@ async def scan_barcode(request: BarcodeRequest):
             ingredients=product_info["ingredients"],
             ingredient_count=ingredient_count,
             rating=rating,
-            certifications=product_info["certifications"],
+            certifications=certifications,
             image_url=product_info["image_url"]
         )
         

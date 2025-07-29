@@ -357,7 +357,8 @@ async def scan_barcode(request: BarcodeRequest):
                 "ingredients": [],
                 "image_url": None,
                 "ingredients_text": "",
-                "labels": ""
+                "labels": "",
+                "source": "Generated"
             }
         
         # Enhanced certification detection using USDA API

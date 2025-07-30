@@ -198,6 +198,9 @@ const BarcodeScanner = ({ onResult, loading }) => {
           qrbox: { width: 250, height: 250 },
           aspectRatio: 1.0,
           showTorchButtonIfSupported: true,
+          facingMode: "environment", // Use rear camera by default
+          rememberLastUsedCamera: false, // Don't allow camera switching
+          supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
         },
         false
       );

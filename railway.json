@@ -1,0 +1,10 @@
+# Railway Configuration
+{
+  "build": {
+    "dockerfile": "deployment/Dockerfile"
+  },
+  "deploy": {
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}

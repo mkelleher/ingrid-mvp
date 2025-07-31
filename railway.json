@@ -1,7 +1,6 @@
-# Railway Configuration
 {
   "build": {
-    "dockerfile": "deployment/Dockerfile"
+    "dockerfile": "Dockerfile"
   },
   "deploy": {
     "restartPolicyType": "ON_FAILURE",

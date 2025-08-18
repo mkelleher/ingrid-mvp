@@ -46,9 +46,14 @@ api_router = APIRouter(prefix="/api")
 
 # Initialize OCR reader with error handling
 try:
-    ocr_reader = easyocr.Reader(['en'])
-    OCR_AVAILABLE = True
-    logger.info("EasyOCR initialized successfully")
+    if EASYOCR_AVAILABLE:
+        ocr_reader = easyocr.Reader(['en'])
+        OCR_AVAILABLE = True
+        logger.info("EasyOCR initialized successfully")
+    else:
+        ocr_reader = None
+        OCR_AVAILABLE = False
+        logger.warning("EasyOCR not available: Module not installed. OCR functionality will be disabled.")
 except Exception as e:
     ocr_reader = None
     OCR_AVAILABLE = False

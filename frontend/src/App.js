@@ -204,6 +204,8 @@ const BarcodeScanner = ({ onResult, loading }) => {
           showZoomSliderIfSupported: false, // Hide zoom controls
           defaultZoomValueIfSupported: 1, // Default zoom level
           disableFlip: true, // Disable camera flip button
+          showSelectCamera: false, // Hide camera selection dropdown
+          showPermissionsButton: false, // Hide permissions dialog
           videoConstraints: {
             facingMode: "environment" // Enforce rear camera constraint
           }

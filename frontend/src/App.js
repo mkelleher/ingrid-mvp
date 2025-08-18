@@ -729,7 +729,7 @@ const FavoritesScreen = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className="min-h-screen bg-gray-50 pb-32">
       {/* Header */}
       <div className="bg-white px-4 py-6 shadow-sm">
         <h1 className="text-2xl font-bold text-gray-800 text-center">Favorites</h1>

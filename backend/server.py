@@ -16,7 +16,12 @@ import base64
 from PIL import Image
 import io
 import numpy as np
-import easyocr
+try:
+    import easyocr
+    EASYOCR_AVAILABLE = True
+except ImportError:
+    easyocr = None
+    EASYOCR_AVAILABLE = False
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')

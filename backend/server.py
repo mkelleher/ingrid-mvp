@@ -441,6 +441,34 @@ async def scan_ocr(session_id: str = Form(...), image: UploadFile = File(...)):
     try:
         logger.info(f"Starting OCR processing for session: {session_id}")
         
+        # Check if OCR is available
+        if not OCR_AVAILABLE or ocr_reader is None:
+            logger.warning("OCR not available - returning basic response")
+            # Return basic product info when OCR is not available
+            product = ProductInfo(
+                name="OCR Service Unavailable",
+                ingredients=["OCR processing temporarily unavailable"],
+                ingredient_count=1,
+                rating="amber",
+                certifications=[]
+            )
+            
+            # Save product to database
+            await db.products.insert_one(product.dict())
+            
+            # Record scan
+            scan_record = ScanRecord(
+                session_id=session_id,
+                product_id=product.id,
+                scan_type="ocr"
+            )
+            await db.scans.insert_one(scan_record.dict())
+            
+            return AnalysisResult(
+                product=product,
+                is_bookmarked=False
+            )
+        
         # Read and process image
         image_data = await image.read()
         try:

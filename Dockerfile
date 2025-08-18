@@ -1,9 +1,9 @@
-# Ultra-minimal Dockerfile - Should work on all platforms
+# Truly minimal Dockerfile - NO system packages
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy requirements and install Python dependencies only
+# Copy requirements and install Python dependencies ONLY
 COPY backend/requirements-no-ocr.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 

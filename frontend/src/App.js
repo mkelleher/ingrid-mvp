@@ -198,16 +198,13 @@ const BarcodeScanner = ({ onResult, loading }) => {
           qrbox: { width: 250, height: 250 },
           aspectRatio: 1.0,
           showTorchButtonIfSupported: true,
-          facingMode: "environment", // Force rear camera
+          facingMode: "environment", // Prefer rear camera
           rememberLastUsedCamera: false, // Don't remember camera choice
           supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
-          // Disable all UI elements that show camera selection
           showZoomSliderIfSupported: false,
           disableFlip: true,
-          showPermissionsButton: false, // Hide permissions button
-          useBarCodeDetectorIfSupported: true, // Use native detector
           videoConstraints: {
-            facingMode: { exact: "environment" } // Force exact rear camera match
+            facingMode: "environment" // Prefer rear camera
           }
         },
         false // verbose logging disabled
@@ -227,24 +224,6 @@ const BarcodeScanner = ({ onResult, loading }) => {
       );
 
       setScanner(qrScanner);
-
-      // Additional DOM manipulation to hide camera selection after render
-      setTimeout(() => {
-        // Hide any select elements that might appear
-        const selectElements = document.querySelectorAll('#barcode-reader select, #barcode-reader option');
-        selectElements.forEach(el => {
-          el.style.display = 'none';
-          el.style.visibility = 'hidden';
-        });
-        
-        // Hide camera selection divs
-        const cameraSelectionDivs = document.querySelectorAll('[id*="camera"], [class*="camera-selection"]');
-        cameraSelectionDivs.forEach(el => {
-          if (el.tagName === 'SELECT' || el.querySelector('select')) {
-            el.style.display = 'none';
-          }
-        });
-      }, 1000);
 
       return () => {
         if (qrScanner) {

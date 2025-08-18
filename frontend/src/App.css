@@ -373,6 +373,32 @@
   height: auto !important;
 }
 
+/* Hide camera selection dropdown and controls */
+#barcode-reader__camera_selection,
+#barcode-reader__camera_permission_button,
+#barcode-reader__dashboard_section_csr > div:first-child,
+.qr-code-scanner__camera-selection,
+.html5-qrcode-element select,
+#barcode-reader select,
+#barcode-reader option {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Hide Made with Emergent overlay */
+[class*="emergent"],
+[id*="emergent"],
+[data-emergent],
+.emergent-overlay,
+.emergent-watermark,
+[style*="Made with Emergent"],
+[class*="watermark"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
 /* Custom scrollbar */
 .ingredient-list::-webkit-scrollbar {
   width: 4px;

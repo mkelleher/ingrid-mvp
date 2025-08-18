@@ -231,10 +231,16 @@ const BarcodeScanner = ({ onResult, loading }) => {
   };
 
   const stopScanning = () => {
-    if (scanner) {
-      scanner.clear();
+    if (scanner && scanner.stop) {
+      scanner.stop().then(() => {
+        setIsScanning(false);
+      }).catch(err => {
+        console.log("Error stopping camera:", err);
+        setIsScanning(false);
+      });
+    } else {
+      setIsScanning(false);
     }
-    setIsScanning(false);
   };
 
   const handleManualSubmit = (e) => {

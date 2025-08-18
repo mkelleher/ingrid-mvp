@@ -191,44 +191,35 @@ const BarcodeScanner = ({ onResult, loading }) => {
 
   useEffect(() => {
     if (isScanning) {
-      const qrScanner = new Html5QrcodeScanner(
-        "barcode-reader",
-        { 
-          fps: 10, 
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
-          showTorchButtonIfSupported: true,
-          facingMode: "environment", // Force rear camera only
-          rememberLastUsedCamera: false, // Disable camera memory
-          supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA],
-          showZoomSliderIfSupported: false, // Hide zoom controls
-          defaultZoomValueIfSupported: 1, // Default zoom level
-          disableFlip: true, // Disable camera flip button
-          showSelectCamera: false, // Hide camera selection dropdown
-          showPermissionsButton: false, // Hide permissions dialog
-          videoConstraints: {
-            facingMode: "environment" // Enforce rear camera constraint
-          }
+      // Use Html5Qrcode directly for complete control - no camera selection UI
+      const html5QrCode = new Html5Qrcode("barcode-reader");
+      
+      // Start scanning with rear camera directly
+      html5QrCode.start(
+        { facingMode: "environment" }, // Force rear camera
+        {
+          fps: 10,
+          qrbox: { width: 250, height: 250 }
         },
-        false
-      );
-
-      qrScanner.render(
         (decodedText) => {
-          qrScanner.clear();
-          setIsScanning(false);
-          onResult(decodedText);
+          html5QrCode.stop().then(() => {
+            setIsScanning(false);
+            onResult(decodedText);
+          });
         },
         (error) => {
           // Handle scan errors silently
         }
-      );
+      ).catch(err => {
+        console.error("Error starting camera:", err);
+        setIsScanning(false);
+      });
 
-      setScanner(qrScanner);
+      setScanner({ stop: () => html5QrCode.stop() });
 
       return () => {
-        if (qrScanner) {
-          qrScanner.clear();
+        if (html5QrCode) {
+          html5QrCode.stop().catch(err => console.log("Error stopping camera:", err));
         }
       };
     }

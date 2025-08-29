@@ -647,6 +647,7 @@ const HistoryScreen = () => {
   const [activeTab] = useState('history');
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadHistory();
@@ -666,7 +667,7 @@ const HistoryScreen = () => {
 
   const viewResult = (result) => {
     localStorage.setItem('scan_result', JSON.stringify(result));
-    window.location.href = '/result';
+    navigate('/result');
   };
 
   return (

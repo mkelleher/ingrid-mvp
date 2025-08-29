@@ -138,7 +138,7 @@ const ScanScreen = () => {
       <div className="bg-white px-4 py-6 shadow-sm">
         <div className="flex justify-center">
           <img 
-            src="/ingrid-logo.svg" 
+            src="/ingrid-logo-new.png" 
             alt="Ingrid" 
             className="h-48 w-auto"
             style={{ maxWidth: '800px' }}

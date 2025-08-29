@@ -713,6 +713,7 @@ const FavoritesScreen = () => {
   const [activeTab] = useState('favorites');
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadFavorites();
@@ -732,7 +733,7 @@ const FavoritesScreen = () => {
 
   const viewResult = (result) => {
     localStorage.setItem('scan_result', JSON.stringify(result));
-    window.location.href = '/result';
+    navigate('/result');
   };
 
   return (

@@ -373,7 +373,29 @@
   height: auto !important;
 }
 
-/* Hide Made with Emergent overlay only */
+/* Completely hide camera selection elements */
+#barcode-reader select,
+#barcode-reader option,
+#barcode-reader__camera_selection,
+#barcode-reader__dashboard_section_csr select,
+#barcode-reader__dashboard_section_csr option,
+.html5-qrcode-element select,
+.html5-qrcode-element option,
+[id*="__camera_selection"],
+[class*="camera-selection"],
+[id*="qr-code-full-region"] select,
+[id*="qr-code-full-region"] option {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  left: -9999px !important;
+}
+
+/* Hide Made with Emergent overlay */
 [class*="emergent"],
 [id*="emergent"],
 [data-emergent],

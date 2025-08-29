@@ -136,7 +136,14 @@ const ScanScreen = () => {
     <div className="min-h-screen bg-gray-50 pb-32">
       {/* Header */}
       <div className="bg-white px-4 py-6 shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-800 text-center">Ingrid</h1>
+        <div className="flex justify-center">
+          <img 
+            src="/ingrid-logo.svg" 
+            alt="Ingrid" 
+            className="h-12 w-auto"
+            style={{ maxWidth: '200px' }}
+          />
+        </div>
         <p className="text-gray-600 text-center mt-1">Clean eating made simple</p>
       </div>
 

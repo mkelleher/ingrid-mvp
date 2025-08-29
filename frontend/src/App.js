@@ -140,8 +140,8 @@ const ScanScreen = () => {
           <img 
             src="/ingrid-logo.svg" 
             alt="Ingrid" 
-            className="h-24 w-auto"
-            style={{ maxWidth: '400px' }}
+            className="h-48 w-auto"
+            style={{ maxWidth: '800px' }}
           />
         </div>
         <p className="text-gray-600 text-center mt-1">Clean eating made simple</p>

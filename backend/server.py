@@ -44,10 +44,20 @@ app = FastAPI(title="Ingrid MVP API", description="Food scanning and ingredient 
 # Create API router
 api_router = APIRouter(prefix="/api")
 
-# Initialize OCR reader
-ocr_reader = easyocr.Reader(['en'])
-OCR_AVAILABLE = True
-logger.info("EasyOCR initialized successfully for full functionality")
+# Initialize OCR reader with error handling
+try:
+    if EASYOCR_AVAILABLE:
+        ocr_reader = easyocr.Reader(['en'])
+        OCR_AVAILABLE = True
+        logger.info("EasyOCR initialized successfully - full OCR functionality available")
+    else:
+        ocr_reader = None
+        OCR_AVAILABLE = False
+        logger.warning("EasyOCR not available - OCR functionality will be disabled")
+except Exception as e:
+    ocr_reader = None
+    OCR_AVAILABLE = False
+    logger.warning(f"EasyOCR initialization failed: {e} - OCR functionality will be disabled")
 
 # Pydantic Models
 class ProductInfo(BaseModel):

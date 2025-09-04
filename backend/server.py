@@ -16,12 +16,7 @@ import base64
 from PIL import Image
 import io
 import numpy as np
-try:
-    import easyocr
-    EASYOCR_AVAILABLE = True
-except ImportError:
-    easyocr = None
-    EASYOCR_AVAILABLE = False
+import easyocr
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -44,20 +39,10 @@ app = FastAPI(title="Ingrid MVP API", description="Food scanning and ingredient 
 # Create API router
 api_router = APIRouter(prefix="/api")
 
-# Initialize OCR reader with error handling
-try:
-    if EASYOCR_AVAILABLE:
-        ocr_reader = easyocr.Reader(['en'])
-        OCR_AVAILABLE = True
-        logger.info("EasyOCR initialized successfully")
-    else:
-        ocr_reader = None
-        OCR_AVAILABLE = False
-        logger.warning("EasyOCR not available: Module not installed. OCR functionality will be disabled.")
-except Exception as e:
-    ocr_reader = None
-    OCR_AVAILABLE = False
-    logger.warning(f"EasyOCR not available: {e}. OCR functionality will be disabled.")
+# Initialize OCR reader
+ocr_reader = easyocr.Reader(['en'])
+OCR_AVAILABLE = True
+logger.info("EasyOCR initialized successfully for full functionality")
 
 # Pydantic Models
 class ProductInfo(BaseModel):

@@ -842,6 +842,15 @@ const ResultScreen = () => {
       </div>
 
       <Navigation activeTab={activeTab} />
+      
+      {/* Wikipedia Modal */}
+      {selectedIngredient && (
+        <WikipediaModal
+          ingredient={selectedIngredient}
+          onClose={() => setSelectedIngredient(null)}
+          onAnalytics={handleAnalytics}
+        />
+      )}
     </div>
   );
 };

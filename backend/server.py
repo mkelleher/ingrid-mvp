@@ -373,6 +373,88 @@ async def lookup_usda_fooddata_central(query: str, barcode: str = None) -> Optio
         logger.error(f"Error looking up USDA FoodData Central: {e}")
         return None
 
+# Wikipedia API integration
+async def get_wikipedia_summary(ingredient_name: str):
+    """Get Wikipedia summary for an ingredient"""
+    try:
+        # Clean ingredient name for search
+        search_term = ingredient_name.strip().lower()
+        
+        # Wikipedia API search endpoint
+        search_url = "https://en.wikipedia.org/api/rest_v1/page/summary/"
+        
+        # Try direct page lookup first
+        direct_url = f"{search_url}{search_term.replace(' ', '_')}"
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.get(direct_url)
+            
+            if response.status_code == 200:
+                data = response.json()
+                return {
+                    "found": True,
+                    "title": data.get("title", ingredient_name),
+                    "summary": data.get("extract", "No summary available."),
+                    "image": data.get("thumbnail", {}).get("source") if data.get("thumbnail") else None,
+                    "url": data.get("content_urls", {}).get("desktop", {}).get("page", ""),
+                    "type": "exact"
+                }
+            
+            # If direct lookup fails, try search
+            search_api_url = f"https://en.wikipedia.org/api/rest_v1/page/search/{search_term}"
+            search_response = await client.get(search_api_url)
+            
+            if search_response.status_code == 200:
+                search_data = search_response.json()
+                pages = search_data.get("pages", [])
+                
+                if pages:
+                    # Get summary for first result
+                    first_result = pages[0]
+                    summary_url = f"{search_url}{first_result['key']}"
+                    summary_response = await client.get(summary_url)
+                    
+                    if summary_response.status_code == 200:
+                        summary_data = summary_response.json()
+                        suggestions = pages[:3]  # Top 3 results
+                        
+                        return {
+                            "found": True,
+                            "title": summary_data.get("title", ingredient_name),
+                            "summary": summary_data.get("extract", "No summary available."),
+                            "image": summary_data.get("thumbnail", {}).get("source") if summary_data.get("thumbnail") else None,
+                            "url": summary_data.get("content_urls", {}).get("desktop", {}).get("page", ""),
+                            "type": "search",
+                            "suggestions": [
+                                {
+                                    "title": page.get("title", ""),
+                                    "description": page.get("description", ""),
+                                    "url": f"https://en.wikipedia.org/wiki/{page.get('key', '')}"
+                                } for page in suggestions
+                            ]
+                        }
+        
+        # If all fails, return fallback
+        return {
+            "found": False,
+            "title": ingredient_name,
+            "summary": f"No Wikipedia article found for '{ingredient_name}'.",
+            "image": None,
+            "url": f"https://www.google.com/search?q={ingredient_name.replace(' ', '+')}+food+ingredient",
+            "type": "fallback"
+        }
+        
+    except Exception as e:
+        logger.error(f"Wikipedia API error for '{ingredient_name}': {e}")
+        return {
+            "found": False,
+            "title": ingredient_name,
+            "summary": "Unable to fetch information at this time.",
+            "image": None,
+            "url": f"https://www.google.com/search?q={ingredient_name.replace(' ', '+')}+food+ingredient",
+            "type": "error"
+        }
+
 # API Endpoints
 @api_router.get("/")
 async def root():

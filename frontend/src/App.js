@@ -804,19 +804,21 @@ const ResultScreen = () => {
 
         {/* Ingredients */}
         <div className="bg-white rounded-lg p-6 shadow-sm">
-          <h3 className="text-lg font-semibold mb-4">Ingredients ({result.product.ingredient_count})</h3>
-          {result.product.ingredients.length > 0 ? (
-            <div className="space-y-2">
-              {result.product.ingredients.map((ingredient, index) => (
-                <div key={index} className="flex items-center py-2 border-b border-gray-100 last:border-b-0">
-                  <span className="text-sm text-gray-600 mr-3">{index + 1}.</span>
-                  <span className="flex-1">{ingredient}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-600">No ingredients detected</p>
-          )}
+          <h3 className="text-lg font-semibold mb-3">Ingredients ({result.product.ingredient_count})</h3>
+          <div className="flex flex-wrap gap-2">
+            {result.product.ingredients.map((ingredient, index) => (
+              <button
+                key={index}
+                onClick={() => handleIngredientClick(ingredient)}
+                className="bg-blue-50 hover:bg-blue-100 text-blue-800 text-sm px-3 py-1.5 rounded-full border border-blue-200 transition-colors cursor-pointer hover:shadow-sm"
+              >
+                {ingredient}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500 mt-2">
+            💡 Tap any ingredient to learn more about it
+          </p>
         </div>
 
         {/* Rating Guide */}

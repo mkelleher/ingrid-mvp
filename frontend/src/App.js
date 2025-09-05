@@ -681,6 +681,7 @@ const WikipediaModal = ({ ingredient, onClose, onAnalytics }) => {
 const ResultScreen = () => {
   const [result, setResult] = useState(null);
   const [activeTab] = useState('scan');
+  const [selectedIngredient, setSelectedIngredient] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {

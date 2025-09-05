@@ -686,6 +686,23 @@ async def get_scan_history(session_id: str):
         logger.error(f"Error getting history: {e}")
         raise HTTPException(status_code=500, detail="Failed to get history")
 
+@api_router.get("/ingredient/wikipedia/{ingredient_name}")
+async def get_ingredient_wikipedia(ingredient_name: str):
+    """Get Wikipedia information for a specific ingredient"""
+    try:
+        wiki_info = await get_wikipedia_summary(ingredient_name)
+        return wiki_info
+    except Exception as e:
+        logger.error(f"Error fetching Wikipedia info for {ingredient_name}: {e}")
+        return {
+            "found": False,
+            "title": ingredient_name,
+            "summary": "Unable to fetch information at this time.",
+            "image": None,
+            "url": f"https://www.google.com/search?q={ingredient_name.replace(' ', '+')}+food+ingredient",
+            "type": "error"
+        }
+
 @api_router.get("/bookmarks/{session_id}", response_model=List[AnalysisResult])
 async def get_bookmarks(session_id: str):
     """Get bookmarked products for a session"""

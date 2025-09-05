@@ -479,7 +479,7 @@ async def scan_barcode(request: BarcodeRequest):
                 "source": "Generated"
             }
         
-        # Enhanced certification detection using USDA API
+        # Enhanced certification detection using USDA API and Wikipedia integration
         certifications = await enhanced_certification_detection(
             product_name=product_info["name"],
             brand=product_info["brand"],

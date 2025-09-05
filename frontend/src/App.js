@@ -511,6 +511,172 @@ const PhotoUploader = ({ onResult, loading }) => {
   );
 };
 
+// Wikipedia Modal Component
+const WikipediaModal = ({ ingredient, onClose, onAnalytics }) => {
+  const [wikiData, setWikiData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (ingredient) {
+      fetchWikipediaData(ingredient);
+      // Analytics: ingredient view
+      onAnalytics?.('ingredient_view', { ingredient_name: ingredient });
+    }
+  }, [ingredient, onAnalytics]);
+
+  const fetchWikipediaData = async (ingredientName) => {
+    try {
+      setLoading(true);
+      const response = await axios.get(`${API}/ingredient/wikipedia/${encodeURIComponent(ingredientName)}`);
+      setWikiData(response.data);
+    } catch (error) {
+      console.error('Error fetching Wikipedia data:', error);
+      setWikiData({
+        found: false,
+        title: ingredientName,
+        summary: "Unable to fetch information at this time.",
+        type: "error"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleWikipediaOpen = (url) => {
+    window.open(url, '_blank');
+    // Analytics: wiki opened
+    onAnalytics?.('wiki_opened', { 
+      ingredient_name: ingredient,
+      wiki_url: url,
+      type: wikiData?.type || 'unknown'
+    });
+  };
+
+  const handleFallbackSearch = () => {
+    const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(ingredient)}+food+ingredient`;
+    window.open(searchUrl, '_blank');
+    // Analytics: fallback search
+    onAnalytics?.('wiki_fallback', { 
+      ingredient_name: ingredient,
+      search_url: searchUrl
+    });
+  };
+
+  if (!ingredient) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg max-w-md w-full max-h-96 overflow-y-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center p-4 border-b">
+          <h3 className="text-lg font-semibold text-gray-900">
+            {loading ? ingredient : wikiData?.title || ingredient}
+          </h3>
+          <button
+            onClick={onClose}
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <FiX size={20} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-4">
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+              <span className="ml-2 text-gray-600">Loading information...</span>
+            </div>
+          ) : (
+            <>
+              {/* Image */}
+              {wikiData?.image && (
+                <div className="mb-4">
+                  <img
+                    src={wikiData.image}
+                    alt={wikiData.title}
+                    className="w-full max-w-32 h-24 object-cover rounded-lg mx-auto"
+                  />
+                </div>
+              )}
+
+              {/* Summary */}
+              <div className="mb-4">
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  {wikiData?.summary || "No summary available."}
+                </p>
+              </div>
+
+              {/* Suggestions (if search results) */}
+              {wikiData?.suggestions && wikiData.suggestions.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-sm font-medium text-gray-600 mb-2">Related articles:</p>
+                  <div className="space-y-2">
+                    {wikiData.suggestions.slice(0, 3).map((suggestion, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleWikipediaOpen(suggestion.url)}
+                        className="block w-full text-left p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                      >
+                        <div className="font-medium text-sm text-blue-600">{suggestion.title}</div>
+                        {suggestion.description && (
+                          <div className="text-xs text-gray-500 mt-1">{suggestion.description}</div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Actions */}
+              <div className="flex flex-col space-y-2">
+                {wikiData?.found && wikiData?.url ? (
+                  <button
+                    onClick={() => handleWikipediaOpen(wikiData.url)}
+                    className="flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <FiExternalLink size={16} className="mr-2" />
+                    Read more on Wikipedia
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleFallbackSearch}
+                    className="flex items-center justify-center bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
+                  >
+                    <FiSearch size={16} className="mr-2" />
+                    Search the web
+                  </button>
+                )}
+              </div>
+
+              {/* Attribution */}
+              <div className="mt-4 pt-3 border-t border-gray-200">
+                <p className="text-xs text-gray-500">
+                  {wikiData?.found ? (
+                    <>
+                      Summary from{' '}
+                      <a
+                        href="https://en.wikipedia.org/wiki/Wikipedia:Text_of_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        Wikipedia (CC BY-SA)
+                      </a>
+                    </>
+                  ) : (
+                    "Information not available from Wikipedia"
+                  )}
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Result Screen Component
 const ResultScreen = () => {
   const [result, setResult] = useState(null);

@@ -275,30 +275,39 @@ const BarcodeScanner = ({ onResult, loading }) => {
   }, [isScanning, onResult]);
 
   // Enhanced camera stopping function
-  const stopCameraCompletely = (scanner) => {
+  const stopCameraCompletely = async (scanner) => {
     try {
-      // Stop the camera first if it's running
-      if (scanner.getState() === Html5QrcodeScannerState.SCANNING) {
-        scanner.stop().then(() => {
-          scanner.clear();
-        }).catch(err => {
-          console.log("Error stopping camera:", err);
-          scanner.clear();
-        });
-      } else {
+      // Clear the scanner first
+      if (scanner) {
         scanner.clear();
       }
       
-      // Additional cleanup - stop all media streams
-      navigator.mediaDevices?.getUserMedia && 
-      navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-          stream.getTracks().forEach(track => track.stop());
-        })
-        .catch(() => {}); // Ignore errors - this is cleanup
+      // Stop all active media streams to release camera
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          stream.getTracks().forEach(track => {
+            track.stop();
+            console.log("Camera track stopped");
+          });
+        } catch (err) {
+          // Ignore errors - camera might already be stopped
+        }
+      }
+      
+      // Clear the scanner container
+      const scannerContainer = document.getElementById('barcode-reader');
+      if (scannerContainer) {
+        scannerContainer.innerHTML = '';
+      }
         
     } catch (err) {
       console.log("Error in camera cleanup:", err);
+      // Force clear the container even if other cleanup fails
+      const scannerContainer = document.getElementById('barcode-reader');
+      if (scannerContainer) {
+        scannerContainer.innerHTML = '';
+      }
     }
   };
 

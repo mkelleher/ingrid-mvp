@@ -290,26 +290,38 @@ async def comprehensive_product_lookup(barcode: str) -> Optional[Dict[str, Any]]
     """Comprehensive product lookup using both USDA FoodData Central and OpenFoodFacts"""
     product_info = None
     
-    # First, try USDA FoodData Central API
-    try:
-        product_info = await lookup_usda_fooddata_central(f"UPC {barcode}", barcode)
-        if product_info:
-            product_info["source"] = "USDA FoodData Central"
-            logger.info(f"Found product in USDA FDC: {product_info['name']}")
-    except Exception as e:
-        logger.warning(f"USDA FoodData Central lookup failed: {e}")
+    # Normalize barcode - try different formats
+    barcode_formats = [
+        barcode,  # Original format
+        barcode.zfill(12),  # Zero-padded to 12 digits
+        barcode.zfill(13),  # Zero-padded to 13 digits (EAN)
+        f"0{barcode}".zfill(12),  # Add leading zero and pad
+    ]
+    
+    # First, try USDA FoodData Central API with different barcode formats
+    for bc_format in barcode_formats:
+        try:
+            product_info = await lookup_usda_fooddata_central(f"UPC {bc_format}", bc_format)
+            if product_info:
+                product_info["source"] = "USDA FoodData Central"
+                logger.info(f"Found product in USDA FDC: {product_info['name']} (barcode: {bc_format})")
+                break
+        except Exception as e:
+            logger.warning(f"USDA FoodData Central lookup failed for {bc_format}: {e}")
     
     # If USDA didn't return results or UPC doesn't match exactly, try OpenFoodFacts
     if not product_info or not product_info.get("upc_match", False):
-        try:
-            openfood_info = await lookup_openfoodfacts_by_barcode(barcode)
-            if openfood_info:
-                # If we have USDA data but no UPC match, prefer OpenFoodFacts for barcode scans
-                if not product_info or not product_info.get("upc_match", False):
-                    product_info = openfood_info
-                    logger.info(f"Using OpenFoodFacts data: {product_info['name']}")
-        except Exception as e:
-            logger.warning(f"OpenFoodFacts lookup failed: {e}")
+        for bc_format in barcode_formats:
+            try:
+                openfood_info = await lookup_openfoodfacts_by_barcode(bc_format)
+                if openfood_info:
+                    # If we have USDA data but no UPC match, prefer OpenFoodFacts for barcode scans
+                    if not product_info or not product_info.get("upc_match", False):
+                        product_info = openfood_info
+                        logger.info(f"Using OpenFoodFacts data: {product_info['name']} (barcode: {bc_format})")
+                        break
+            except Exception as e:
+                logger.warning(f"OpenFoodFacts lookup failed for {bc_format}: {e}")
     
     return product_info
 

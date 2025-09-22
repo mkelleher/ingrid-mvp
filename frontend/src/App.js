@@ -318,12 +318,9 @@ const BarcodeScanner = ({ onResult, loading }) => {
 
   const stopScanning = () => {
     if (scanner) {
-      try {
-        scanner.clear();
-      } catch (err) {
-        console.log("Error stopping scanner:", err);
-      }
+      stopCameraCompletely(scanner);
     }
+    setScanner(null);
     setIsScanning(false);
   };
 

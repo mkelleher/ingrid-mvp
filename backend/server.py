@@ -507,6 +507,19 @@ async def scan_barcode(request: BarcodeRequest):
             text=product_info.get("ingredients_text", "") + " " + product_info.get("labels", "")
         )
         
+        # Post-process ingredients - if we have a product but no ingredients, add a note
+        ingredients = product_info["ingredients"]
+        if not ingredients or (len(ingredients) == 0):
+            if product_info["name"] != f"Product {request.barcode}":
+                # We found the product but no ingredients data
+                ingredients = [f"Ingredients not listed for {product_info['name']}"]
+                product_info["ingredients"] = ingredients
+                logger.warning(f"Product found but no ingredients available: {product_info['name']}")
+            else:
+                # Product not found at all
+                ingredients = ["Product not found in database"]
+                product_info["ingredients"] = ingredients
+        
         # Create product record
         ingredient_count = len(product_info["ingredients"])
         rating = calculate_rating(ingredient_count)

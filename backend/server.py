@@ -350,8 +350,12 @@ async def lookup_usda_fooddata_central(query: str, barcode: str = None) -> Optio
                     ingredients_text = food_item.get("ingredients", "")
                     
                     if ingredients_text:
-                        # Parse ingredients similar to OpenFoodFacts
-                        ingredients = [ing.strip() for ing in re.split(r'[,;]', ingredients_text) if ing.strip()]
+                        # Use the comprehensive ingredient extraction function
+                        ingredients = extract_ingredients_from_text(ingredients_text)
+                        
+                        # If that doesn't work, fall back to simple parsing
+                        if not ingredients:
+                            ingredients = [ing.strip() for ing in re.split(r'[,;]', ingredients_text) if ing.strip()]
                     
                     # Extract brand and product name
                     brand = food_item.get("brandOwner", food_item.get("marketCountry", None))

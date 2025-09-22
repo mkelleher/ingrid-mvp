@@ -493,11 +493,11 @@ async def scan_barcode(request: BarcodeRequest):
             product_info = {
                 "name": f"Product {request.barcode}",
                 "brand": None,
-                "ingredients": [],
+                "ingredients": ["Ingredients not available in database"],
                 "image_url": None,
-                "ingredients_text": "",
+                "ingredients_text": "Ingredients not available in database",
                 "labels": "",
-                "source": "Generated"
+                "source": "Manual Entry"
             }
         
         # Enhanced certification detection using USDA API and Wikipedia integration

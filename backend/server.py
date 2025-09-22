@@ -262,10 +262,15 @@ async def lookup_openfoodfacts_by_barcode(barcode: str) -> Optional[Dict[str, An
                     product = data.get("product", {})
                     ingredients_text = product.get("ingredients_text", "")
                     
-                    # Parse ingredients
+                    # Parse ingredients using comprehensive extraction
                     ingredients = []
                     if ingredients_text:
-                        ingredients = [ing.strip() for ing in re.split(r'[,;]', ingredients_text) if ing.strip()]
+                        # Use the comprehensive ingredient extraction function
+                        ingredients = extract_ingredients_from_text(ingredients_text)
+                        
+                        # If that doesn't work, fall back to simple parsing
+                        if not ingredients:
+                            ingredients = [ing.strip() for ing in re.split(r'[,;]', ingredients_text) if ing.strip()]
                     
                     return {
                         "name": product.get("product_name", "Unknown Product"),

@@ -198,6 +198,12 @@ const BarcodeScanner = ({ onResult, loading }) => {
 
   useEffect(() => {
     if (isScanning) {
+      // Clear the scanner container before creating new scanner
+      const scannerContainer = document.getElementById('barcode-reader');
+      if (scannerContainer) {
+        scannerContainer.innerHTML = '';
+      }
+
       const qrScanner = new Html5QrcodeScanner(
         "barcode-reader",
         { 
@@ -221,8 +227,10 @@ const BarcodeScanner = ({ onResult, loading }) => {
       qrScanner.render(
         (decodedText) => {
           console.log("Barcode detected:", decodedText);
-          qrScanner.clear();
+          // Properly stop and clear the scanner
+          stopCameraCompletely(qrScanner);
           setIsScanning(false);
+          setScanner(null);
           onResult(decodedText);
         },
         (error) => {
@@ -260,15 +268,39 @@ const BarcodeScanner = ({ onResult, loading }) => {
 
       return () => {
         if (qrScanner) {
-          try {
-            qrScanner.clear();
-          } catch (err) {
-            console.log("Error clearing scanner:", err);
-          }
+          stopCameraCompletely(qrScanner);
         }
       };
     }
   }, [isScanning, onResult]);
+
+  // Enhanced camera stopping function
+  const stopCameraCompletely = (scanner) => {
+    try {
+      // Stop the camera first if it's running
+      if (scanner.getState() === Html5QrcodeScannerState.SCANNING) {
+        scanner.stop().then(() => {
+          scanner.clear();
+        }).catch(err => {
+          console.log("Error stopping camera:", err);
+          scanner.clear();
+        });
+      } else {
+        scanner.clear();
+      }
+      
+      // Additional cleanup - stop all media streams
+      navigator.mediaDevices?.getUserMedia && 
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+          stream.getTracks().forEach(track => track.stop());
+        })
+        .catch(() => {}); // Ignore errors - this is cleanup
+        
+    } catch (err) {
+      console.log("Error in camera cleanup:", err);
+    }
+  };
 
   const startScanning = () => {
     setIsScanning(true);
